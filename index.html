@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATS Ganjil PAI & BP Kelas VI – Kurikulum Merdeka</title>
+<style>
+:root{--bg:#f2f6f4;--card:#fff;--ink:#17302b;--mute:#5b6f6a;--line:#d5e0dc;--ac:#0f6b5c;--ok:#1b7f4b;--okbg:#e5f5ec;--bad:#b3261e;--badbg:#fdecea}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1a18;--card:#172623;--ink:#e6f0ed;--mute:#9db3ad;--line:#2a3f3a;--ac:#4cc3ae;--ok:#5fd493;--okbg:#14342a;--bad:#ff8a80;--badbg:#3a1d1a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.ar{font-family:"Amiri","Noto Naskh Arabic","Traditional Arabic","Scheherazade New",serif;font-size:1.45em;line-height:1.9}
+header.top{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header.top b{font-size:15px}
+#timer{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ac);font-size:18px}
+#prog{font-size:13px;color:var(--mute)}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:12px 0 4px}
+.meta{color:var(--mute);font-size:14px;margin:0 0 16px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+label.f{display:block;font-weight:600;margin-bottom:4px}
+input[type=text],select,textarea{width:100%;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:90px;resize:vertical}
+h2{font-size:18px;margin:28px 0 4px;padding-top:8px;border-top:2px solid var(--ac)}
+.info{color:var(--mute);font-size:14px;margin:0 0 12px}
+.q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.q.ok{border-left-color:var(--ok)}.q.bad{border-left-color:var(--bad)}.q.man{border-left-color:var(--ac)}
+.q p{margin:0 0 8px}.q .n{font-weight:700;margin-right:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:6px 8px;border-radius:8px;cursor:pointer}
+.opt:hover{background:var(--bg)}
+.opt input{margin-top:7px;flex:none}
+.opt.right{background:var(--okbg)}.opt.wrong{background:var(--badbg)}
+.key{margin-top:10px;padding:8px 12px;border-radius:8px;background:var(--okbg);font-size:14px}
+.key.man{background:var(--bg);border:1px dashed var(--ac)}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:12px 22px;background:var(--ac);color:#fff;cursor:pointer}
+@media(prefers-color-scheme:dark){button{color:#0b1412}}
+button.alt{background:transparent;color:var(--ac);border:1px solid var(--ac)}
+#result{display:none}
+#result .score{font-size:40px;font-weight:800;color:var(--ac);line-height:1.1}
+table{border-collapse:collapse;width:100%;font-size:14px;margin-top:8px}
+td,th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
+.sel{max-width:100%}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+@media print{header.top,button{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <b>ATS Ganjil PAI &amp; BP – Kelas VI</b>
+  <span id="prog">0 / 45 terjawab</span>
+  <span id="timer">90:00</span>
+</header>
+<main>
+  <h1>Asesmen Tengah Semester Ganjil</h1>
+  <p class="meta">Pendidikan Agama Islam &amp; Budi Pekerti · Kelas VI / Fase C · Kurikulum Merdeka · TP 2026/2027 · 45 soal · ± 90 menit</p>
+
+  <div class="box" id="intro">
+    <label class="f" for="nama">Nama lengkap</label>
+    <input type="text" id="nama" autocomplete="name" placeholder="Tulis namamu di sini">
+    <p class="info" style="margin-top:10px">Petunjuk: baca setiap soal dengan teliti. Soal pilihan ganda kompleks boleh memilih lebih dari satu jawaban. Waktu berjalan sejak halaman dibuka dan jawaban terkumpul otomatis saat waktu habis.</p>
+  </div>
+
+  <form id="ujian" onsubmit="return false"></form>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 40px">
+    <button id="kirim">Kumpulkan jawaban</button>
+  </div>
+
+  <section id="result" class="box" aria-live="polite"></section>
+</main>
+
+<script>
+/* ============ BANK SOAL ============ */
+// PG: [soal, jawaban benar, pengecoh1, pengecoh2, pengecoh3] – urutan opsi diacak otomatis
+const PG=[
+["Perhatikan lafaz <b>أَلَمْ نَشْرَحْ لَكَ صَدْرَكَ</b>. Hukum bacaan pada huruf mim mati (مْ) yang bertemu nun adalah ...","Idzhar syafawi","Idgham mimi","Ikhfa syafawi","Idzhar halqi"],
+["Lanjutan dari ayat <b>فَإِنَّ مَعَ الْعُسْرِ يُسْرًا</b> adalah ...","إِنَّ مَعَ الْعُسْرِ يُسْرًا","وَرَفَعْنَا لَكَ ذِكْرَكَ","فَإِذَا فَرَغْتَ فَانصَبْ","وَإِلَىٰ رَبِّكَ فَارْغَب"],
+["Pesan pokok Q.S. Al-Insyirah ayat pertama adalah ...","Allah melapangkan dada Nabi Muhammad saw. sehingga beliau merasa tenang","Nabi Muhammad saw. diperintahkan untuk berperang","Nabi Muhammad saw. diberi harta yang sangat banyak","Nabi Muhammad saw. diminta berhenti berdakwah"],
+["Q.S. Al-Insyirah diturunkan untuk ...","menghibur Nabi Muhammad saw. yang menghadapi kesulitan dan tekanan dalam berdakwah","memerintahkan salat lima waktu","mengabarkan kemenangan pada Perang Badar","memerintahkan hijrah ke Madinah"],
+["Arti Q.S. Al-Insyirah ayat ke-6 adalah ...","Sesungguhnya bersama kesulitan ada kemudahan","Bukankah Kami telah melapangkan dadamu?","Dan hanya kepada Tuhanmulah engkau berharap","Dan Kami tinggikan sebutan namamu"],
+["Al-Insyirah secara bahasa berarti ...","kelapangan (dada)","kesabaran","kesulitan","kemenangan"],
+["Budi gagal juara lomba menggambar. Ia tidak putus asa, terus berlatih, dan yakin ada kemudahan setelah kesulitan. Sikap Budi mencerminkan pengamalan ...","Q.S. Al-Insyirah","Q.S. Al-Ikhlas","Q.S. Al-Kafirun","Q.S. Al-Asr"],
+["Urutan ayat Q.S. Al-Insyirah yang benar dari potongan berikut:<br>(1) <b>وَرَفَعْنَا لَكَ ذِكْرَكَ</b><br>(2) <b>أَلَمْ نَشْرَحْ لَكَ صَدْرَكَ</b><br>(3) <b>فَإِنَّ مَعَ الْعُسْرِ يُسْرًا</b><br>(4) <b>وَوَضَعْنَا عَنكَ وِزْرَكَ</b><br>adalah ...","(2) – (4) – (1) – (3)","(1) – (2) – (3) – (4)","(4) – (2) – (3) – (1)","(3) – (1) – (4) – (2)"],
+["Al-Waliy berarti ...","Maha Melindungi","Maha Melihat","Maha Mendengar","Maha Terpuji"],
+["Rani melihat temannya diejek. Rani menegur pengejek dan menemani temannya. Perilaku yang meneladani Al-Waliy dalam kejadian itu adalah ...","Rani membela dan melindungi temannya yang diejek","Rani ikut menertawakan temannya","Rani pura-pura tidak melihat","Rani menjauhi temannya yang diejek"],
+["Q.S. Al-Baqarah ayat 257 menjelaskan bahwa Allah Al-Waliy adalah ...","pelindung orang beriman yang mengeluarkan mereka dari kegelapan menuju cahaya","pencipta langit dan bumi saja","pemberi rezeki bagi hewan","penghukum orang yang lupa"],
+["Makna asmaul husna Al-Hamid adalah ...","Maha Terpuji","Maha Adil","Maha Sabar","Maha Melindungi"],
+["Dodi mendapat nilai bagus, lalu mengucap <i>alhamdulillah</i> dan berterima kasih kepada guru dan orang tuanya. Sikap Dodi meneladani asmaul husna ...","Al-Hamid","Al-Adl","Al-Waliy","As-Sabur"],
+["Bu Ani memberi nilai sesuai hasil kerja setiap siswa dan tidak membeda-bedakan anak teman dekatnya. Sikap Bu Ani mencerminkan pengamalan asmaul husna ...","Al-Adl","Al-Hamid","Al-Waliy","As-Sabur"],
+["Al-Adl berarti ...","Maha Adil","Maha Terpuji","Maha Sabar","Maha Melindungi"],
+["Tono diejek temannya, tetapi ia tetap tenang, tidak membalas, dan memaafkan. Tono meneladani asmaul husna ...","As-Sabur","Al-Hamid","Al-Adl","Al-Waliy"],
+["As-Sabur bermakna ...","Maha Sabar","Maha Adil","Maha Terpuji","Maha Melindungi"],
+["Kata <i>wathan</i> pada istilah ukhuwah wathaniyah berarti ...","tanah air","agama","manusia","keluarga"],
+["Tetangga Dina, Bu Maria, sedang mengadakan ibadah di rumahnya. Sikap Dina yang tepat adalah ...","menjaga ketenangan dan tetap bersikap ramah","bermain musik keras di dekat rumah itu","meminta mereka menghentikan ibadah","memutus pergaulan dengan tetangga"],
+["Pernyataan yang tepat tentang menghargai perbedaan agama adalah ...","menghormati keyakinan orang lain tanpa memaksakan keyakinan sendiri","memaksa teman mengikuti agama kita","mengejek tata cara ibadah agama lain","hanya berteman dengan yang seagama"],
+["Sikap yang tepat terhadap perbedaan suku, agama, dan budaya adalah ...","saling menghargai dan bekerja sama","memilih teman dari suku yang sama saja","merasa suku sendiri paling baik","menjauhi teman yang berbeda budaya"],
+["Contoh penerapan ukhuwah Islamiyah sehari-hari adalah ...","menjenguk teman muslim yang sakit dan mendoakannya","membeda-bedakan teman berdasarkan kekayaan","tidak menyapa teman yang berbeda pendapat","mengabaikan teman yang butuh bantuan"],
+["Ukhuwah wathaniyah adalah persaudaraan sesama ...","warga bangsa (setanah air)","umat Islam","anggota keluarga","teman sekelas"],
+["Di kelas VI ada siswa dari berbagai suku. Saat kerja kelompok, sikap yang sesuai dengan keberagaman adalah ...","bekerja sama dengan semua teman tanpa memilih suku","memilih anggota yang sesuku saja","tidak mau sekelompok dengan suku lain","mengejek logat bicara teman"],
+["Perilaku yang mencerminkan ukhuwah insaniyah adalah ...","menolong korban banjir tanpa memandang agama dan suku","hanya menolong keluarga sendiri","menolong jika diberi imbalan","menolong teman yang seagama saja"]
+];
+// PGK: [soal, [jawaban benar...], [pengecoh...]] – harus benar semua
+const PGK=[
+["Pokok kandungan utama Q.S. Al-Insyirah adalah (pilih 3 jawaban):",["Setiap kesulitan disertai kemudahan","Allah melapangkan dada Nabi Muhammad saw.","Hanya kepada Allah kita berharap"],["Kesulitan tidak pernah berakhir","Boleh berputus asa saat gagal"]],
+["Perilaku yang mencerminkan sifat As-Sabur (pilih 3 jawaban):",["Tetap tenang saat diejek","Tekun belajar meski belum berhasil","Menunggu giliran dengan tertib"],["Marah saat diberi nasihat","Menyerah ketika gagal"]],
+["Hikmah meneladani sifat Al-Hamid dalam kehidupan sehari-hari (pilih 3 jawaban):",["Menjadi pribadi yang pandai bersyukur","Terbiasa mengucap <i>alhamdulillah</i>","Berusaha berperilaku terpuji"],["Menjadi sombong atas prestasi","Merasa cukup tanpa berterima kasih"]],
+["Contoh penerapan ukhuwah insaniyah di lingkungan sekolah (pilih 3 jawaban):",["Membantu teman yang terjatuh tanpa melihat latar belakangnya","Bermain bersama teman dari agama berbeda","Ikut menjaga kebersihan kelas bersama-sama"],["Mengucilkan teman baru","Membeda-bedakan teman saat berkelompok"]],
+["Hikmah berteman tanpa membedakan agama (pilih 3 jawaban):",["Hidup rukun dan damai","Memiliki banyak teman dan wawasan","Terbiasa saling menolong"],["Mudah terjadi perselisihan","Persatuan menjadi lemah"]]
+];
+// Isian singkat: [soal, [kata kunci diterima], kunci]
+const IS=[
+["Terjemahan ayat <b>وَإِلَىٰ رَبِّكَ فَارْغَب</b>: “Dan hanya kepada ... engkau berharap.”",["tuhanmu","tuhan-mu","rabbmu","tuhan"],"Tuhanmu"],
+["Q.S. Al-Insyirah adalah surah ke-... dalam mushaf Al-Qur’an.",["94"],"94"],
+["As-Sabur berarti Maha ...",["sabar","penyabar"],"Sabar"],
+["Ukhuwah insaniyah adalah persaudaraan antar sesama ...",["manusia","umat manusia"],"Manusia"],
+["Dina berteman baik dengan Kevin yang beragama Kristen dan tidak mengganggu ibadahnya. Sikap Dina disebut ...",["toleransi","toleran"],"Toleransi"]
+];
+// Menjodohkan
+const JD=["Maha Melindungi","Maha Terpuji","Maha Adil","8 ayat","Persaudaraan sesama warga bangsa (setanah air)","Persaudaraan sesama muslim"];
+const JM=[["Al-Waliy",0],["Al-Hamid",1],["Jumlah ayat Q.S. Al-Insyirah",3],["Ukhuwah wathaniyah",4],["Ukhuwah Islamiyah",5]];
+// Uraian: [soal, pedoman jawaban]
+const UR=[
+["Sebutkan minimal tiga pesan pokok yang terkandung dalam Q.S. Al-Insyirah!","Setiap kesulitan pasti disertai kemudahan; Allah menghibur dan melapangkan dada Nabi Muhammad saw.; setelah selesai satu urusan, lanjutkan urusan lain dengan sungguh-sungguh; hanya kepada Allah kita berharap."],
+["Jelaskan makna asmaul husna Al-Adl!","Al-Adl berarti Maha Adil: Allah menempatkan segala sesuatu pada tempatnya dan memberi hak setiap makhluk secara seimbang, tidak berbuat zalim."],
+["Jelaskan bentuk sifat As-Sabur Allah kepada hamba-Nya yang sering berbuat maksiat!","Allah tidak langsung menghukum, tetapi memberi waktu dan kesempatan untuk bertobat, serta tetap memberi rezeki dan kesehatan agar hamba memperbaiki diri."],
+["Sebutkan hikmah berteman tanpa membedakan agama!","Hidup rukun dan damai; memiliki banyak teman dan wawasan; saling menolong; menghindari permusuhan; memperkuat persatuan bangsa."],
+["Apa sikap yang tepat jika kamu menemui teman yang membeda-bedakan orang lain karena perbedaan agama? Jelaskan!","Tidak ikut membeda-bedakan; menasihati dengan sopan bahwa semua manusia sama-sama ciptaan Allah dan harus saling menghormati; tetap berteman baik dengan semua; melapor kepada guru bila terjadi perundungan."]
+];
+const BOBOT={pg:2,pgk:3,is:2,jd:2,ur:3};
+
+/* ============ RENDER ============ */
+const ar=t=>t.replace(/[\u0600-\u06FF][\u0600-\u06FF\s\u200c]*[\u0600-\u06FF]/g,m=>`<span class="ar" dir="rtl">${m}</span>`);
+const sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const L="ABCDEF";
+const form=document.getElementById('ujian');
+const Q=[];let no=0,html='';
+const sec=(t,i)=>html+=`<h2>${t}</h2><p class="info">${i}</p>`;
+
+sec('A. Pilihan Ganda (No. 1–25)','Pilih satu jawaban yang paling benar. Skor 2 tiap soal.');
+PG.forEach(([q,c,...w])=>{no++;const o=sh([c,...w]);Q.push({t:'pg',no,o,c:o.indexOf(c),key:c});
+ html+=`<div class="q" id="q${no}"><p><span class="n">${no}.</span>${ar(q)}</p>`+o.map((x,i)=>`<label class="opt"><input type="radio" name="q${no}" value="${i}"><span><b>${L[i]}.</b> ${ar(x)}</span></label>`).join('')+`</div>`});
+
+sec('B. Pilihan Ganda Kompleks (No. 26–30)','Pilih semua jawaban yang benar (lebih dari satu). Skor 3 bila semua benar.');
+PGK.forEach(([q,c,w])=>{no++;const o=sh([...c,...w]);Q.push({t:'pgk',no,o,c:c.map(x=>o.indexOf(x)),key:c});
+ html+=`<div class="q" id="q${no}"><p><span class="n">${no}.</span>${ar(q)}</p>`+o.map((x,i)=>`<label class="opt"><input type="checkbox" name="q${no}" value="${i}"><span>${ar(x)}</span></label>`).join('')+`</div>`});
+
+sec('C. Isian Singkat (No. 31–35)','Isi dengan satu kata atau angka. Skor 2 tiap soal.');
+IS.forEach(([q,k,d])=>{no++;Q.push({t:'is',no,k,key:d});
+ html+=`<div class="q" id="q${no}"><p><span class="n">${no}.</span>${ar(q)}</p><input type="text" name="q${no}" autocomplete="off" aria-label="Jawaban nomor ${no}"></div>`});
+
+sec('D. Menjodohkan (No. 36–40)','Pilih pasangan yang tepat dari daftar jawaban di bawah. Skor 2 tiap soal.');
+html+=`<div class="box"><b>Daftar jawaban</b><br>`+JD.map((x,i)=>`${L[i]}. ${x}`).join('<br>')+`</div>`;
+JM.forEach(([q,c])=>{no++;Q.push({t:'jd',no,c,key:`${L[c]}. ${JD[c]}`});
+ html+=`<div class="q" id="q${no}"><p><span class="n">${no}.</span>${q} → </p><select class="sel" name="q${no}" aria-label="Pasangan nomor ${no}"><option value="">— pilih —</option>${JD.map((x,i)=>`<option value="${i}">${L[i]}. ${x}</option>`).join('')}</select></div>`});
+
+sec('E. Uraian (No. 41–45)','Jawab dengan kalimat lengkap. Skor maksimal 3 tiap soal, dinilai oleh guru.');
+UR.forEach(([q,k])=>{no++;Q.push({t:'ur',no,key:k});
+ html+=`<div class="q" id="q${no}"><p><span class="n">${no}.</span>${q}</p><textarea name="q${no}" aria-label="Jawaban nomor ${no}"></textarea></div>`});
+form.innerHTML=html;
+
+/* ============ PROGRES & TIMER ============ */
+const filled=x=>{const n=`q${x.no}`;if(x.t==='pgk')return form.querySelectorAll(`[name=${n}]:checked`).length>0;if(x.t==='pg')return !!form.querySelector(`[name=${n}]:checked`);return form.elements[n].value.trim()!==''};
+const upd=()=>document.getElementById('prog').textContent=Q.filter(filled).length+' / 45 terjawab';
+form.addEventListener('input',upd);form.addEventListener('change',upd);
+let sisa=90*60,done=false;
+const tm=setInterval(()=>{if(done)return;sisa--;const m=String(Math.floor(sisa/60)).padStart(2,'0'),s=String(sisa%60).padStart(2,'0');document.getElementById('timer').textContent=`${m}:${s}`;if(sisa<=0)kumpul(true)},1000);
+
+/* ============ PENILAIAN ============ */
+function kumpul(auto){
+ if(done)return;
+ if(!auto){const k=45-Q.filter(filled).length;if(!confirm(k?`Masih ada ${k} soal belum dijawab. Kumpulkan sekarang?`:'Kumpulkan jawaban sekarang?'))return}
+ done=true;clearInterval(tm);
+ const rows=[];let skor=0;const per={pg:0,pgk:0,is:0,jd:0};
+ Q.forEach(x=>{
+  const card=document.getElementById('q'+x.no),n='q'+x.no;let ok=null;
+  if(x.t==='pg'){const v=form.querySelector(`[name=${n}]:checked`);ok=v&&+v.value===x.c;
+   card.querySelectorAll('.opt').forEach((l,i)=>{if(i===x.c)l.classList.add('right');else if(v&&+v.value===i)l.classList.add('wrong')})}
+  else if(x.t==='pgk'){const v=[...form.querySelectorAll(`[name=${n}]:checked`)].map(e=>+e.value).sort();ok=v.length===x.c.length&&[...x.c].sort().every((a,i)=>a===v[i]);
+   card.querySelectorAll('.opt').forEach((l,i)=>{const on=l.querySelector('input').checked;if(x.c.includes(i))l.classList.add('right');else if(on)l.classList.add('wrong')})}
+  else if(x.t==='is'){const v=form.elements[n].value.trim().toLowerCase();ok=v!==''&&x.k.some(k=>v.includes(k))}
+  else if(x.t==='jd'){const v=form.elements[n].value;ok=v!==''&&+v===x.c}
+  card.querySelectorAll('input,select,textarea').forEach(e=>e.disabled=true);
+  const kunci=x.t==='pgk'?x.key.join('; '):x.key;
+  if(x.t==='ur'){card.classList.add('man');card.insertAdjacentHTML('beforeend',`<div class="key man"><b>Pedoman jawaban:</b> ${x.key}<br><small>Dinilai guru (skor maks. ${BOBOT.ur}).</small></div>`)}
+  else{card.classList.add(ok?'ok':'bad');if(ok){skor+=BOBOT[x.t];per[x.t]+=BOBOT[x.t]}
+   card.insertAdjacentHTML('beforeend',`<div class="key" style="${ok?'':'background:var(--badbg)'}">${ok?'✔ Benar':'✘ Kurang tepat'} — Kunci: ${ar(kunci)}</div>`)}
+ });
+ const nama=document.getElementById('nama').value.trim()||'(tanpa nama)';
+ const maks={pg:50,pgk:15,is:10,jd:10};
+ const r=document.getElementById('result');
+ r.style.display='block';
+ r.innerHTML=`<p style="margin:0">Hasil untuk <b>${nama}</b></p><div class="score">${skor} / 85</div><p class="info">Skor otomatis (soal objektif). Uraian No. 41–45 (maks. 15 poin) dinilai guru menggunakan pedoman jawaban di bawah tiap soal. Nilai akhir = skor otomatis + skor uraian.</p>
+ <table><tr><th>Bagian</th><th>Skor</th></tr>
+ <tr><td>A. Pilihan Ganda</td><td>${per.pg} / ${maks.pg}</td></tr>
+ <tr><td>B. Pilihan Ganda Kompleks</td><td>${per.pgk} / ${maks.pgk}</td></tr>
+ <tr><td>C. Isian Singkat</td><td>${per.is} / ${maks.is}</td></tr>
+ <tr><td>D. Menjodohkan</td><td>${per.jd} / ${maks.jd}</td></tr>
+ <tr><td>E. Uraian</td><td>dinilai guru / 15</td></tr></table>
+ <p style="margin:16px 0 0"><button class="alt" onclick="window.print()">Cetak hasil</button> <button class="alt" onclick="location.reload()">Ulangi</button></p>`;
+ document.getElementById('kirim').style.display='none';
+ r.scrollIntoView({behavior:'smooth'});
+}
+document.getElementById('kirim').addEventListener('click',()=>kumpul(false));
+</script>
+</body>
+</html>
